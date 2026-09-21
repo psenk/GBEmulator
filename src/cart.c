@@ -50,10 +50,38 @@ bool cart_open_file()
     return false;
 }
 
-void cart_print_info()
+void cart_print_info() // print header data
 {
+    printf("Entry point: %.2X%.2X%.2X%.2X\n", cartridge_header->entry_point[0], cartridge_header->entry_point[1], cartridge_header->entry_point[2], cartridge_header->entry_point[3]);
+    printf("Title: %s\n", cartridge_header->title);
+    printf("CGB Flag: %.2X\n", cartridge_header->cgb_flag);
+    printf("New Licensee Code: %.2X%.2X\n", cartridge_header->new_licensee_code[0], cartridge_header->new_licensee_code[1]);
+    printf("SGB Flag: %.2X\n", cartridge_header->sgb_flag);
+    printf("Cartridge Type: %.2X\n", cartridge_header->cartridge_type);
+    printf("ROM Size: %.2X\n", cartridge_header->rom_size);
+    printf("RAM Size: %.2X\n", cartridge_header->ram_size);
+    printf("Destination Code: %.2X\n", cartridge_header->destination_code);
+    printf("Old Licensee Code: %.2X\n", cartridge_header->old_licensee_code);
+    printf("Mask ROM Version Number: %.2X\n", cartridge_header->mask_rom_version_number);
+    printf("Header Checksum: %.2X\n", cartridge_header->header_checksum);
+    printf("Global Checksum: %.2X%.2X\n", cartridge_header->global_checksum_hi, cartridge_header->global_checksum_lo);
 }
 
 bool cart_load(const char *filename)
 {
+    FILE *file = fopen(filename, "rb"); // open file in read binary mode
+    if (file)
+    {
+        fseek(file, 0, SEEK_END); // moves read position to end of file to get size
+        long size = ftell(file);  // get current position (size thanks to above)
+        fseek(file, 0, SEEK_SET); // back to start of file
+
+        fread(cartridge_data, 1, MAX_CART_SIZE, file); // reads 1 byte each from file into cartridge data
+        fclose(file);
+        printf("ROM %s loaded, size: %ld bytes\n", filename, size);
+        return true;
+    }
+
+    printf("Failed to load file %s\n", filename);
+    return false;
 }
